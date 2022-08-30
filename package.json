@@ -11,9 +11,12 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "mysql2": "^2.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "sass": "^1.54.6",
+    "sequelize": "^6.21.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
