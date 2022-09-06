@@ -1,25 +1,84 @@
-import logo from './logo.svg';
-import './App.scss';
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import { Route, Switch } from 'react-router-dom';
+
+import { ConnectedRouter as Router } from 'connected-react-router';
+
+import { history } from '../redux';
+
+import { path } from '../utils'
+
+import { userIsNotAuthenticated } from '../hoc/authentication';
+
+import { CustomToastCloseButton } from '../components/CustomToast';
+import ConfirmModal from '../components/ConfirmModal';
+
+import Header from './Header/Header';  
+import Login from '../views/Login';
+
+import { ToastContainer } from 'react-toastify';
+
+class App extends Component {
+
+    handlePersistorState = () => {
+        const { persistor } = this.props;
+        let { bootstrapped } = persistor.getState();
+        if (bootstrapped) {
+            if (this.props.onBeforeLift) {
+                Promise.resolve(this.props.onBeforeLift())
+                    .then(() => this.setState({ bootstrapped: true }))
+                    .catch(() => this.setState({ bootstrapped: true }));
+            } else {
+                this.setState({ bootstrapped: true });
+            }
+        }
+    };
+
+    componentDidMount() {
+        this.handlePersistorState();
+    }
+
+    render() {
+        return (
+            <Fragment>
+              <Router history={history}>
+              <div className="main-container">
+                        <ConfirmModal />
+                        {this.props.isLoggedIn && <Header />}
+
+                        <span className="content-container">
+                            <Switch>
+                                {/* <Route path={path.HOME} exact component={(Home)} /> */}
+                                <Route path={path.LOGIN} component={userIsNotAuthenticated(Login)} />
+                                {/* <Route path={path.SYSTEM} component={userIsAuthenticated(System)} /> */}
+                            </Switch>
+                        </span>
+
+                        <ToastContainer
+                            className="toast-container" toastClassName="toast-item" bodyClassName="toast-item-body"
+                            autoClose={false} hideProgressBar={true} pauseOnHover={false}
+                            pauseOnFocusLoss={true} closeOnClick={false} draggable={false}
+                            closeButton={<CustomToastCloseButton />}
+                        />
+                    </div>
+
+              </Router>
+            </Fragment>
+        )
+    }
 }
 
-export default App;
+const mapStateToProps = state => {
+    return {
+        started: state.app.started,
+        isLoggedIn: state.admin.isLoggedIn
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
